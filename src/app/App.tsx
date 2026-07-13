@@ -1,5 +1,7 @@
-import { Fragment, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Send, Phone, Mail, MapPin, Instagram, Facebook } from "lucide-react";
+"use client";
+
+import { Fragment, useEffect, useRef, useState, type FormEvent } from "react";
+import { ChevronLeft, ChevronRight, Send, Phone, Mail, MapPin, Instagram, Facebook, Youtube } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import logo from "@/imports/logo500.png";
 import headerLogo from "@/imports/logo-croissant.png";
@@ -129,7 +131,7 @@ export default function App() {
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSent(true);
     setForm({ name: "", email: "", phone: "", message: "" });
@@ -140,17 +142,17 @@ export default function App() {
     <div className="min-h-screen bg-background text-foreground overflow-x-clip font-sans">
 
       {/* ── Brand header ────────────────────────────────────── */}
-      <div className="flex flex-col items-center bg-[#f8f4ee] px-6">
+      <header className="flex flex-col items-center bg-[#f8f4ee] px-6">
         <ImageWithFallback
-          src={headerLogo}
+          src={headerLogo.src}
           alt="Восъчна Пекарна лого"
           className="w-[180px] h-[180px] max-w-full object-contain"
         />
-      </div>
 
       {/* ── Sticky navigation ────────────────────────────────── */}
       <nav
         ref={navRef}
+        aria-label="Основна навигация"
         className={`relative sticky top-0 z-50 -mt-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 bg-[#f8f4ee] px-6 py-3 border-b border-border before:absolute before:-top-px before:left-1/2 before:h-[2px] before:w-[60px] before:-translate-x-1/2 before:bg-[#0d2222] before:transition-opacity ${navIsStuck ? "before:opacity-0" : "before:opacity-100"}`}
       >
         {navItems.map((item, index) => (
@@ -167,7 +169,9 @@ export default function App() {
           </Fragment>
         ))}
       </nav>
+      </header>
 
+      <main>
       {/* ── Hero / Intro ───────────────────────────────────────── */}
       <section id="intro" className="relative h-[calc(100dvh-238px)] flex items-center justify-center overflow-hidden">
         {/* Autoplaying background video */}
@@ -242,6 +246,8 @@ export default function App() {
                     <img
                       src={p.img}
                       alt={p.name}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
                     />
                   </div>
@@ -300,7 +306,7 @@ export default function App() {
                 className="snap-start flex-shrink-0 w-72 bg-card border border-border overflow-hidden"
               >
                 <div className="h-52 overflow-hidden bg-muted">
-                  <img src={p.img} alt={p.name} className="w-full h-full object-cover" />
+                  <img src={p.img} alt={p.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 </div>
                 <div className="p-4">
                   <h3 className="font-title text-base text-foreground mb-1">{p.name}</h3>
@@ -334,6 +340,8 @@ export default function App() {
                 <img
                   src={img.src}
                   alt={img.alt}
+                  loading="lazy"
+                  decoding="async"
                   className={`w-full object-cover hover:scale-105 transition-transform duration-700 ${
                     i === 0 ? "h-64 md:h-full" : "h-48 md:h-56"
                   }`}
@@ -387,16 +395,23 @@ export default function App() {
                 <a
                   href="#"
                   aria-label="Instagram"
-                  className="w-9 h-9 border border-border flex items-center justify-center text-foreground/50 hover:text-foreground hover:border-foreground/30 transition-colors"
+                  className="w-9 h-9 flex items-center justify-center bg-gradient-to-br from-[#f58529] via-[#dd2a7b] to-[#8134af] text-white hover:scale-105 transition"
                 >
                   <Instagram className="w-4 h-4" />
                 </a>
                 <a
                   href="#"
                   aria-label="Facebook"
-                  className="w-9 h-9 border border-border flex items-center justify-center text-foreground/50 hover:text-foreground hover:border-foreground/30 transition-colors"
+                  className="w-9 h-9 flex items-center justify-center bg-[#1877f2] text-white hover:scale-105 transition"
                 >
                   <Facebook className="w-4 h-4" />
+                </a>
+                <a
+                  href="#"
+                  aria-label="YouTube"
+                  className="w-9 h-9 flex items-center justify-center bg-[#ff0000] text-white hover:scale-105 transition"
+                >
+                  <Youtube className="w-4 h-4" />
                 </a>
               </div>
 
@@ -458,31 +473,28 @@ export default function App() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* ── Footer ─────────────────────────────────────────────── */}
       <footer className="bg-foreground text-primary-foreground py-14 px-6 border-t border-foreground/20">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            {/* Logo + name */}
+            {/* Official logo */}
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="flex items-center gap-4"
+              className="flex items-center cursor-pointer"
+              aria-label="Към началото"
             >
               <ImageWithFallback
-                src={logo}
+                src={logo.src}
                 alt="Восъчна Пекарна"
-                className="h-14 w-auto object-contain brightness-0 invert opacity-75"
+                loading="lazy"
+                className="h-20 w-20 object-contain"
               />
-              <div className="text-left">
-                <p className="font-title text-lg text-primary-foreground/85 leading-tight">Восъчна Пекарна</p>
-                <p className="font-sans text-[0.65rem] text-primary-foreground/40 tracking-widest uppercase mt-0.5">
-                  Занаятчийски хляб от 2018
-                </p>
-              </div>
             </button>
 
             {/* Nav */}
-            <nav className="flex flex-wrap justify-center gap-8">
+            <nav aria-label="Навигация във футъра" className="flex flex-wrap justify-center gap-8">
               {navItems.map((item) => (
                 <button
                   key={item.href}
@@ -499,23 +511,30 @@ export default function App() {
               <a
                 href="#"
                 aria-label="Instagram"
-                className="w-8 h-8 border border-primary-foreground/20 flex items-center justify-center text-primary-foreground/40 hover:text-primary-foreground/70 hover:border-primary-foreground/40 transition-colors"
+                className="w-8 h-8 flex items-center justify-center bg-gradient-to-br from-[#f58529] via-[#dd2a7b] to-[#8134af] text-white hover:scale-105 transition"
               >
                 <Instagram className="w-3.5 h-3.5" />
               </a>
               <a
                 href="#"
                 aria-label="Facebook"
-                className="w-8 h-8 border border-primary-foreground/20 flex items-center justify-center text-primary-foreground/40 hover:text-primary-foreground/70 hover:border-primary-foreground/40 transition-colors"
+                className="w-8 h-8 flex items-center justify-center bg-[#1877f2] text-white hover:scale-105 transition"
               >
-                <Facebook className="w-3.5 h-3.5" />
+                  <Facebook className="w-3.5 h-3.5" />
+                </a>
+              <a
+                href="#"
+                aria-label="YouTube"
+                className="w-8 h-8 flex items-center justify-center bg-[#ff0000] text-white hover:scale-105 transition"
+              >
+                <Youtube className="w-3.5 h-3.5" />
               </a>
             </div>
           </div>
 
           <div className="mt-10 pt-6 border-t border-primary-foreground/10 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="font-sans text-xs text-primary-foreground/30">
-              © 2024 Восъчна Пекарна. Всички права запазени.
+              © 2026 Восъчна Пекарна. Всички права запазени.
             </p>
             <p className="font-sans text-xs text-primary-foreground/20">
               vosuchnapekarna.com
