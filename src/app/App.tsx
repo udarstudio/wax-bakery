@@ -85,31 +85,37 @@ export default function App() {
 
   const maxStart = products.length - VISIBLE;
 
+  const getCurrentSection = () => {
+    const navHeight = navRef.current?.offsetHeight ?? 0;
+    const readingLine = window.scrollY + navHeight + window.innerHeight * 0.35;
+
+    return navItems.reduce((current, item) => {
+      const section = document.querySelector(item.href);
+
+      if (section instanceof HTMLElement && section.offsetTop <= readingLine) {
+        return item.href;
+      }
+
+      return current;
+    }, "#intro");
+  };
+
   useEffect(() => {
-    const updateNavState = () => setNavIsStuck((navRef.current?.getBoundingClientRect().top ?? 1) <= 0);
-    updateNavState();
-    window.addEventListener("scroll", updateNavState, { passive: true });
+    const updatePageState = () => {
+      setNavIsStuck((navRef.current?.getBoundingClientRect().top ?? 1) <= 0);
 
-    const sections = navItems
-      .map(({ href }) => document.querySelector(href))
-      .filter((section): section is HTMLElement => section instanceof HTMLElement);
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleSection = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!suppressNavTrackingRef.current) {
+        setActiveSection(getCurrentSection());
+      }
+    };
 
-        if (visibleSection && !suppressNavTrackingRef.current) {
-          setActiveSection(`#${visibleSection.target.id}`);
-        }
-      },
-      { rootMargin: "-35% 0px -55% 0px", threshold: 0 },
-    );
+    updatePageState();
+    window.addEventListener("scroll", updatePageState, { passive: true });
+    window.addEventListener("resize", updatePageState);
 
-    sections.forEach((section) => observer.observe(section));
     return () => {
-      window.removeEventListener("scroll", updateNavState);
-      observer.disconnect();
+      window.removeEventListener("scroll", updatePageState);
+      window.removeEventListener("resize", updatePageState);
       if (navTrackingTimeoutRef.current) clearTimeout(navTrackingTimeoutRef.current);
     };
   }, []);
@@ -120,6 +126,7 @@ export default function App() {
     if (navTrackingTimeoutRef.current) clearTimeout(navTrackingTimeoutRef.current);
     navTrackingTimeoutRef.current = setTimeout(() => {
       suppressNavTrackingRef.current = false;
+      setActiveSection(getCurrentSection());
     }, 1600);
 
     if (href === "#intro") {
@@ -128,7 +135,13 @@ export default function App() {
     }
 
     const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+    if (el instanceof HTMLElement) {
+      const navHeight = navRef.current?.offsetHeight ?? 0;
+      window.scrollTo({
+        top: el.getBoundingClientRect().top + window.scrollY - navHeight + 1,
+        behavior: "smooth",
+      });
+    }
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -148,6 +161,7 @@ export default function App() {
           alt="Восъчна Пекарна лого"
           className="w-[180px] h-[180px] max-w-full object-contain"
         />
+      </header>
 
       {/* ── Sticky navigation ────────────────────────────────── */}
       <nav
@@ -169,7 +183,6 @@ export default function App() {
           </Fragment>
         ))}
       </nav>
-      </header>
 
       <main>
       {/* ── Hero / Intro ───────────────────────────────────────── */}
