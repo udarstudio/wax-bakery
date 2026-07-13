@@ -32,24 +32,6 @@ const products = [
     price: "2.80 лв",
     img: "/images/wax-candle-bread-slice.jpeg",
   },
-  {
-    name: "Канелена Руладка",
-    desc: "Топла руладка с канела и захарна глазура",
-    price: "3.50 лв",
-    img: "https://images.unsplash.com/photo-1783058890700-4aee307c36a9?w=600&h=700&fit=crop&auto=format",
-  },
-  {
-    name: "Асорти Кошница",
-    desc: "Подбрана кошница от нашите дневни специалитети",
-    price: "18.00 лв",
-    img: "https://images.unsplash.com/photo-1723930213705-cfd76dcfc36c?w=600&h=700&fit=crop&auto=format",
-  },
-  {
-    name: "Маслен Кифел",
-    desc: "Деликатен кифел с прясно масло и морска сол",
-    price: "2.50 лв",
-    img: "https://images.unsplash.com/photo-1651604033534-e66b281f1981?w=600&h=700&fit=crop&auto=format",
-  },
 ];
 
 const galleryImages = [
@@ -83,7 +65,7 @@ export default function App() {
   const suppressNavTrackingRef = useRef(false);
   const navTrackingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const maxStart = products.length - VISIBLE;
+  const maxStart = Math.max(0, products.length - VISIBLE);
 
   const getCurrentSection = () => {
     const navHeight = navRef.current?.offsetHeight ?? 0;
@@ -159,7 +141,7 @@ export default function App() {
         <ImageWithFallback
           src={headerLogo.src}
           alt="Восъчна Пекарна лого"
-          className="w-[180px] h-[180px] max-w-full object-contain"
+          className="h-[140px] w-[140px] max-w-full object-contain sm:h-[180px] sm:w-[180px]"
         />
       </header>
 
@@ -167,19 +149,42 @@ export default function App() {
       <nav
         ref={navRef}
         aria-label="Основна навигация"
-        className={`relative sticky top-0 z-50 -mt-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 bg-[#f8f4ee] px-6 py-3 border-b border-border before:absolute before:-top-px before:left-1/2 before:h-[2px] before:w-[60px] before:-translate-x-1/2 before:bg-[#0d2222] before:transition-opacity ${navIsStuck ? "before:opacity-0" : "before:opacity-100"}`}
+        className={`relative sticky top-0 z-50 -mt-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-2 bg-[#f8f4ee] px-4 py-2 border-b border-border before:absolute before:-top-px before:left-1/2 before:h-[2px] before:w-[60px] before:-translate-x-1/2 before:bg-[#0d2222] before:transition-opacity sm:gap-x-4 sm:px-6 sm:py-3 ${navIsStuck ? "before:opacity-0" : "before:opacity-100"}`}
       >
         {navItems.map((item, index) => (
           <Fragment key={item.href}>
             <button
               onClick={() => scrollTo(item.href)}
-              className={`font-title text-[1.55rem] transition-colors duration-200 hover:text-accent ${
+              className={`font-title text-[18px] transition-colors duration-200 hover:text-accent sm:text-[1.55rem] ${
                 activeSection === item.href ? "text-accent" : "text-[#0d2222]"
               }`}
             >
               {item.label}
             </button>
-            {index < navItems.length - 1 && <span aria-hidden="true" className="h-[5px] w-[5px] rounded-full bg-[#0d2222]" />}
+            {index < navItems.length - 1 && (
+              <span
+                aria-hidden="true"
+                className={`relative flex h-8 items-center justify-center transition-[width] duration-300 ease-out sm:h-10 ${
+                  index === 1 && navIsStuck ? "w-8 sm:w-10" : "w-[3px] sm:w-[5px]"
+                }`}
+              >
+                <span
+                  className={`h-[3px] w-[3px] rounded-full bg-[#0d2222] transition-all duration-200 ease-out sm:h-[5px] sm:w-[5px] ${
+                    index === 1 && navIsStuck ? "scale-0 opacity-0" : "scale-100 opacity-100"
+                  }`}
+                />
+                {index === 1 && (
+                  <ImageWithFallback
+                    src={headerLogo.src}
+                    alt=""
+                    aria-hidden="true"
+                    className={`absolute h-8 w-8 object-contain transition-all duration-300 ease-out sm:h-10 sm:w-10 ${
+                      navIsStuck ? "scale-100 opacity-100" : "scale-[0.12] opacity-0"
+                    }`}
+                  />
+                )}
+              </span>
+            )}
           </Fragment>
         ))}
       </nav>
@@ -278,37 +283,38 @@ export default function App() {
               ))}
             </div>
 
-            {/* Controls */}
-            <div className="flex items-center justify-center gap-6 mt-10">
-              <button
-                onClick={() => setSlideStart((s) => Math.max(0, s - 1))}
-                disabled={slideStart === 0}
-                className="w-10 h-10 border border-border flex items-center justify-center text-foreground disabled:opacity-25 hover:bg-card transition-colors"
-                aria-label="Предишни"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <div className="flex gap-2">
-                {Array.from({ length: maxStart + 1 }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSlideStart(i)}
-                    className={`transition-all duration-200 rounded-full ${
-                      i === slideStart ? "w-5 h-1.5 bg-foreground" : "w-1.5 h-1.5 bg-border"
-                    }`}
-                    aria-label={`Слайд ${i + 1}`}
-                  />
-                ))}
+            {products.length > VISIBLE && (
+              <div className="flex items-center justify-center gap-6 mt-10">
+                <button
+                  onClick={() => setSlideStart((s) => Math.max(0, s - 1))}
+                  disabled={slideStart === 0}
+                  className="w-10 h-10 border border-border flex items-center justify-center text-foreground disabled:opacity-25 hover:bg-card transition-colors"
+                  aria-label="Предишни"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <div className="flex gap-2">
+                  {Array.from({ length: maxStart + 1 }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSlideStart(i)}
+                      className={`transition-all duration-200 rounded-full ${
+                        i === slideStart ? "w-5 h-1.5 bg-foreground" : "w-1.5 h-1.5 bg-border"
+                      }`}
+                      aria-label={`Слайд ${i + 1}`}
+                    />
+                  ))}
+                </div>
+                <button
+                  onClick={() => setSlideStart((s) => Math.min(maxStart, s + 1))}
+                  disabled={slideStart >= maxStart}
+                  className="w-10 h-10 border border-border flex items-center justify-center text-foreground disabled:opacity-25 hover:bg-card transition-colors"
+                  aria-label="Следващи"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
-              <button
-                onClick={() => setSlideStart((s) => Math.min(maxStart, s + 1))}
-                disabled={slideStart >= maxStart}
-                className="w-10 h-10 border border-border flex items-center justify-center text-foreground disabled:opacity-25 hover:bg-card transition-colors"
-                aria-label="Следващи"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+            )}
           </div>
 
           {/* Mobile horizontal scroll */}
@@ -382,8 +388,7 @@ export default function App() {
             {/* Contact info */}
             <div className="flex flex-col gap-6">
               <p className="font-sans text-muted-foreground leading-relaxed text-sm">
-                В Восъчна Пекарна вратите ни са отворени всеки ден от 7:00 до 19:00 ч.
-                Радваме се на всяко запитване, поръчка или просто добра дума.
+                Във Восъчна Пекарна се радваме на всяко запитване, поръчка или просто добра дума.
               </p>
 
               <div className="flex flex-col gap-4 mt-2">
@@ -391,7 +396,6 @@ export default function App() {
                   <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-accent" />
                   <div>
                     <p className="font-sans text-sm text-foreground">ул. Пекарска 12, София 1000</p>
-                    <p className="font-sans text-xs text-muted-foreground mt-0.5">Пон – Нед: 07:00 – 19:00</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
